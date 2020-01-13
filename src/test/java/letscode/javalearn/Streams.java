@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.*;
 
+import static java.nio.file.Files.walk;
+
 public class Streams {
     private List<Employee> emps = List.of(
             new Employee("Michael", "Smith", 243, 43, Position.CHEF),
@@ -49,18 +51,18 @@ public class Streams {
 
     @Test
     public void creation() throws IOException {
+// ------- генерация из файла -----------
         Stream<String> lines = Files.lines(Paths.get("some.txt"));
-        Stream<Path> list = Files.list(Paths.get("./"));
+        Stream<Path> list = Files.list(Paths.get("./"));// стрим путей файлов из текущей дирректории..
         Stream<Path> walk = Files.walk(Paths.get("./"), 3);
 
         IntStream intStream = IntStream.of(1, 2, 3, 4);
         DoubleStream doubleStream = DoubleStream.of(1.2, 3.4);
         IntStream range = IntStream.range(10, 100); // 10 .. 99
         IntStream intStream1 = IntStream.rangeClosed(10, 100); // 10 .. 100
-
+        
         int[] ints = {1, 2, 3, 4};
         IntStream stream = Arrays.stream(ints);
-
         Stream<String> stringStream = Stream.of("1", "2", "3");
         Stream<? extends Serializable> stream1 = Stream.of(1, "2", "3");
 
@@ -73,8 +75,7 @@ public class Streams {
         Stream<Employee> employeeStream = emps.parallelStream();
 
         Stream<Event> generate = Stream.generate(() ->
-                new Event(UUID.randomUUID(), LocalDateTime.now(), "")
-        );
+                new Event(UUID.randomUUID(), LocalDateTime.now(), ""));
 
         Stream<Integer> iterate = Stream.iterate(1950, val -> val + 3);
 
@@ -91,16 +92,23 @@ public class Streams {
 
         emps.stream().forEachOrdered(employee -> System.out.println(employee.getAge()));
 
+
         emps.stream().collect(Collectors.toList());
         emps.stream().toArray();
+
+//  ------- перевод с другому типу коллекции и закрытие стрима
+//          emps.stream().collect(Collectors.toMap( ..
+
         Map<Integer, String> collect = emps.stream().collect(Collectors.toMap(
                 Employee::getId,
                 emp -> String.format("%s %s", emp.getLastName(), emp.getFirstName())
         ));
 
+
         IntStream intStream = IntStream.of(100, 200, 300, 400);
         intStream.reduce((left, right) -> left + right).orElse(0);
 
+// -------- дерево ----------
         System.out.println(deps.stream().reduce(this::reducer));
 
         IntStream.of(100, 200, 300, 400).average();
@@ -128,6 +136,7 @@ public class Streams {
 
         IntStream.of(100, 200, 300, 400, 100, 200).distinct(); // 100, 200, 300, 400
 
+// -------- фильтры ----------
         Stream<Employee> employeeStream = emps.stream().filter(employee -> employee.getPosition() != Position.CHEF);
 
         emps.stream()
@@ -139,6 +148,8 @@ public class Streams {
                 .peek(emp -> emp.setAge(18))
                 .map(emp -> String.format("%s %s", emp.getLastName(), emp.getFirstName()));
 
+
+// ------  .takeWhile как триггер, в не фильтр
         emps.stream().takeWhile(employee -> employee.getAge() > 30).forEach(System.out::println);
         System.out.println();
         emps.stream().dropWhile(employee -> employee.getAge() > 30).forEach(System.out::println);

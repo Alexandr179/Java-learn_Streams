@@ -11,9 +11,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 @ToString(of = {"id", "child"})
 public class Department {
+
     private final int id;
     private final int parent;
     private final String name;
 
+    // все поля Department в сете
     private Set<Department> child = new HashSet<>();
 }
